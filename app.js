@@ -1,7 +1,5 @@
 // Configuration
-const BACKEND_URL = 'https://market-pulse-backend.vercel.app/api/market-data';
-// After deploying to Vercel, update this URL to your own deployment
-// Example: 'https://your-project-name.vercel.app/api/market-data'
+const BACKEND_URL = 'https://market-pulse-umber.vercel.app/api/market-data';
 
 // Fallback mock data if backend is unavailable
 const fallbackMarkets = [

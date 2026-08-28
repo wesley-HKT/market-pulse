@@ -197,7 +197,7 @@ function renderAlertItem(alert) {
     `;
 }
 
-// Fetch real market data from backend
+// Fetch real market data and alerts from backend
 async function fetchMarketData() {
     if (isLoading) return;
     
@@ -213,8 +213,9 @@ async function fetchMarketData() {
         
         const data = await response.json();
         
-        if (data.success && data.markets && data.markets.length > 0) {
-            currentMarkets = data.markets;
+        if (data.success) {
+            currentMarkets = data.markets || [];
+            currentAlerts = data.alerts || [];
             updateDisclaimer(data.disclaimer || 'Live data from Alpha Vantage');
             showToast('Market data updated');
         } else {
@@ -223,6 +224,7 @@ async function fetchMarketData() {
     } catch (error) {
         console.error('Failed to fetch market data:', error.message);
         currentMarkets = fallbackMarkets;
+        currentAlerts = [];
         updateDisclaimer('Using fallback data - backend unavailable');
         showToast('Using fallback data', 'warning');
     } finally {
@@ -231,6 +233,7 @@ async function fetchMarketData() {
         updateTimestamp();
         populateWatchlist();
         populateMarkets();
+        populateAlerts();
     }
 }
 
@@ -328,8 +331,8 @@ function filterMarkets(category) {
 // Filter alerts by type
 function filterAlerts(type) {
     const filtered = type === 'all'
-        ? mockAlerts
-        : mockAlerts.filter(a => a.type === type);
+        ? currentAlerts
+        : currentAlerts.filter(a => a.type === type);
     
     if (filtered.length === 0) {
         noAlertsMessage.style.display = 'block';
@@ -344,6 +347,7 @@ function filterAlerts(type) {
 async function init() {
     // Start with fallback data
     currentMarkets = fallbackMarkets;
+    currentAlerts = [];
     populateWatchlist();
     populateMarkets();
     populateAlerts();

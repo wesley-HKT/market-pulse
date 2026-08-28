@@ -1,5 +1,10 @@
-// Mock market data - same as Expo project
-const mockMarkets = [
+// Configuration
+const BACKEND_URL = 'https://market-pulse-backend.vercel.app/api/market-data';
+// After deploying to Vercel, update this URL to your own deployment
+// Example: 'https://your-project-name.vercel.app/api/market-data'
+
+// Fallback mock data if backend is unavailable
+const fallbackMarkets = [
     {
         symbol: 'XAU/USD',
         name: 'Gold Spot',
@@ -9,7 +14,8 @@ const mockMarkets = [
         changePercent: 0.53,
         lastUpdated: new Date().toISOString(),
         iconClass: 'gold',
-        icon: 'fas fa-gem'
+        icon: 'fas fa-gem',
+        source: 'fallback'
     },
     {
         symbol: 'BTC/USD',
@@ -20,7 +26,8 @@ const mockMarkets = [
         changePercent: -1.77,
         lastUpdated: new Date().toISOString(),
         iconClass: 'crypto',
-        icon: 'fab fa-bitcoin'
+        icon: 'fab fa-bitcoin',
+        source: 'fallback'
     },
     {
         symbol: 'USD/JPY',
@@ -31,7 +38,8 @@ const mockMarkets = [
         changePercent: 0.23,
         lastUpdated: new Date().toISOString(),
         iconClass: 'forex',
-        icon: 'fas fa-yen-sign'
+        icon: 'fas fa-yen-sign',
+        source: 'fallback'
     },
     {
         symbol: 'EUR/JPY',
@@ -42,7 +50,8 @@ const mockMarkets = [
         changePercent: -0.17,
         lastUpdated: new Date().toISOString(),
         iconClass: 'forex',
-        icon: 'fas fa-euro-sign'
+        icon: 'fas fa-euro-sign',
+        source: 'fallback'
     },
     {
         symbol: 'GBP/JPY',
@@ -53,11 +62,12 @@ const mockMarkets = [
         changePercent: 0.36,
         lastUpdated: new Date().toISOString(),
         iconClass: 'forex',
-        icon: 'fas fa-pound-sign'
+        icon: 'fas fa-pound-sign',
+        source: 'fallback'
     }
 ];
 
-// Mock alerts
+// Mock alerts (these would also come from backend with real signals)
 const mockAlerts = [
     {
         id: 1,
@@ -99,6 +109,11 @@ const refreshBtn = document.getElementById('refreshBtn');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 const lastUpdateTime = document.getElementById('lastUpdateTime');
+const disclaimerEl = document.querySelector('.disclaimer p');
+
+// State
+let currentMarkets = [];
+let isLoading = false;
 
 // Tab navigation
 tabButtons.forEach(button => {
@@ -143,6 +158,7 @@ function formatChange(value) {
 // Render watchlist item
 function renderWatchlistItem(market) {
     const changeClass = market.change >= 0 ? 'positive' : 'negative';
+    const sourceBadge = market.source !== 'Alpha Vantage' ? `<span class="source-badge">${market.source}</span>` : '';
     
     return `
         <div class="watchlist-item">
@@ -151,7 +167,7 @@ function renderWatchlistItem(market) {
                     <i class="${market.icon}"></i>
                 </div>
                 <div class="instrument-info">
-                    <h4>${market.symbol}</h4>
+                    <h4>${market.symbol} ${sourceBadge}</h4>
                     <p>${market.name}</p>
                 </div>
             </div>
@@ -168,6 +184,7 @@ function renderWatchlistItem(market) {
 // Render market item (for Markets tab)
 function renderMarketItem(market) {
     const changeClass = market.change >= 0 ? 'positive' : 'negative';
+    const sourceBadge = market.source !== 'Alpha Vantage' ? `<span class="source-badge">${market.source}</span>` : '';
     
     return `
         <div class="market-item">
@@ -176,7 +193,7 @@ function renderMarketItem(market) {
                     <i class="${market.icon}"></i>
                 </div>
                 <div class="instrument-info">
-                    <h4>${market.symbol}</h4>
+                    <h4>${market.symbol} ${sourceBadge}</h4>
                     <p>${market.name}</p>
                 </div>
             </div>
@@ -210,14 +227,77 @@ function renderAlertItem(alert) {
     `;
 }
 
+// Fetch real market data from backend
+async function fetchMarketData() {
+    if (isLoading) return;
+    
+    isLoading = true;
+    showLoadingState(true);
+    
+    try {
+        const response = await fetch(`${BACKEND_URL}?symbols=XAUUSD,BTCUSD,USDJPY,EURJPY,GBPJPY`);
+        
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.markets && data.markets.length > 0) {
+            currentMarkets = data.markets;
+            updateDisclaimer(data.disclaimer || 'Live data from Alpha Vantage');
+            showToast('Market data updated');
+        } else {
+            throw new Error('No market data received');
+        }
+    } catch (error) {
+        console.error('Failed to fetch market data:', error.message);
+        currentMarkets = fallbackMarkets;
+        updateDisclaimer('Using fallback data - backend unavailable');
+        showToast('Using fallback data', 'warning');
+    } finally {
+        isLoading = false;
+        showLoadingState(false);
+        updateTimestamp();
+        populateWatchlist();
+        populateMarkets();
+    }
+}
+
+// Show/hide loading state
+function showLoadingState(show) {
+    if (show) {
+        watchlistEl.innerHTML = '<div class="loading">Loading market data...</div>';
+        marketsListEl.innerHTML = '<div class="loading">Loading market data...</div>';
+        refreshBtn.querySelector('i').className = 'fas fa-spinner fa-spin';
+    } else {
+        refreshBtn.querySelector('i').className = 'fas fa-sync-alt';
+    }
+}
+
+// Update disclaimer
+function updateDisclaimer(text) {
+    if (disclaimerEl) {
+        disclaimerEl.innerHTML = `<i class="fas fa-info-circle"></i> ${text}`;
+    }
+}
+
 // Populate watchlist
 function populateWatchlist() {
-    watchlistEl.innerHTML = mockMarkets.map(renderWatchlistItem).join('');
+    if (!currentMarkets || currentMarkets.length === 0) {
+        currentMarkets = fallbackMarkets;
+    }
+    
+    watchlistEl.innerHTML = currentMarkets.map(renderWatchlistItem).join('');
 }
 
 // Populate markets list
 function populateMarkets() {
-    marketsListEl.innerHTML = mockMarkets.map(renderMarketItem).join('');
+    if (!currentMarkets || currentMarkets.length === 0) {
+        currentMarkets = fallbackMarkets;
+    }
+    
+    marketsListEl.innerHTML = currentMarkets.map(renderMarketItem).join('');
 }
 
 // Populate alerts
@@ -232,8 +312,19 @@ function populateAlerts() {
 }
 
 // Show toast notification
-function showToast(message) {
+function showToast(message, type = 'success') {
     toastMessage.textContent = message;
+    
+    // Reset icon
+    const icon = toast.querySelector('i');
+    if (type === 'warning') {
+        icon.className = 'fas fa-exclamation-triangle';
+        icon.style.color = '#ffaa00';
+    } else {
+        icon.className = 'fas fa-check-circle';
+        icon.style.color = '#2ecc71';
+    }
+    
     toast.classList.add('show');
     
     setTimeout(() => {
@@ -245,31 +336,21 @@ function showToast(message) {
 function updateTimestamp() {
     const now = new Date();
     const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    lastUpdateTime.textContent = timeString;
+    if (lastUpdateTime) {
+        lastUpdateTime.textContent = timeString;
+    }
 }
 
 // Simulate refresh
 function simulateRefresh() {
-    // Add a slight random fluctuation to prices
-    mockMarkets.forEach(market => {
-        const fluctuation = (Math.random() - 0.5) * 10;
-        market.currentPrice += fluctuation;
-        market.change += fluctuation;
-        market.changePercent = (market.change / (market.currentPrice - market.change)) * 100;
-        market.lastUpdated = new Date().toISOString();
-    });
-    
-    updateTimestamp();
-    populateWatchlist();
-    populateMarkets();
-    showToast('Watchlist updated with latest data');
+    fetchMarketData();
 }
 
 // Filter markets by category
 function filterMarkets(category) {
     const filtered = category === 'all' 
-        ? mockMarkets 
-        : mockMarkets.filter(m => m.category === category);
+        ? currentMarkets 
+        : currentMarkets.filter(m => m.category === category);
     
     marketsListEl.innerHTML = filtered.map(renderMarketItem).join('');
 }
@@ -290,11 +371,18 @@ function filterAlerts(type) {
 }
 
 // Initialize
-function init() {
+async function init() {
+    // Start with fallback data
+    currentMarkets = fallbackMarkets;
     populateWatchlist();
     populateMarkets();
     populateAlerts();
     updateTimestamp();
+    
+    // Try to fetch real data
+    setTimeout(() => {
+        fetchMarketData();
+    }, 1000);
     
     // Refresh button
     refreshBtn.addEventListener('click', simulateRefresh);
@@ -330,10 +418,12 @@ function init() {
         showToast(`RSI extreme detection ${this.checked ? 'enabled' : 'disabled'}`);
     });
     
-    // Auto-refresh every 30 seconds
+    // Auto‑refresh every 60 seconds (Alpha Vantage free tier: 5 calls/minute)
     setInterval(() => {
-        simulateRefresh();
-    }, 30000);
+        if (!isLoading) {
+            fetchMarketData();
+        }
+    }, 60000);
     
     // Update status bar time every minute
     setInterval(() => {
@@ -344,9 +434,30 @@ function init() {
     
     // Show welcome toast
     setTimeout(() => {
-        showToast('Market Pulse ready. All data is mock.');
-    }, 1000);
+        showToast('Market Pulse ready. Fetching live data...');
+    }, 500);
 }
+
+// Add CSS for source badge
+const style = document.createElement('style');
+style.textContent = `
+    .source-badge {
+        font-size: 10px;
+        background: #444;
+        color: #ccc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-size: 14px;
+    }
+`;
+document.head.appendChild(style);
 
 // Start when DOM is ready
 if (document.readyState === 'loading') {

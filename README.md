@@ -47,3 +47,90 @@ To turn this into a real alert system:
 ## License
 
 MIT
+
+
+## Real‑Time Data Setup
+
+The prototype now supports real‑time market data via Alpha Vantage API.
+
+### 1. Deploy the Backend to Vercel
+
+1. **Push all files** to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Add real‑time backend"
+   git push origin gh-pages
+   ```
+
+2. **Go to [Vercel](https://vercel.com)** and import your GitHub repository.
+
+3. **Set environment variable:**
+   - In Vercel project dashboard → Settings → Environment Variables
+   - Add `ALPHA_VANTAGE_API_KEY` with your key `LA1XN79UZUQ1R0JU`
+   - Scope: Production (and Preview if needed)
+
+4. **Deploy.** Vercel will give you a URL like `https://your-project.vercel.app`.
+
+5. **Update front‑end URL:** In `app.js`, change `BACKEND_URL` to your Vercel URL:
+   ```javascript
+   const BACKEND_URL = 'https://your-project.vercel.app/api/market-data';
+   ```
+
+### 2. Alpha Vantage API Key
+
+Your key `LA1XN79UZUQ1R0JU` is from [Alpha Vantage](https://www.alphavantage.co/support/#api-key).
+
+**Limits (free tier):**
+- 5 API calls per minute
+- 500 calls per day
+- Real‑time and historical data
+- Supports Forex, Crypto, Commodities
+
+**Covered symbols:**
+- `XAUUSD` (Gold)
+- `BTCUSD` (Bitcoin) 
+- `USDJPY`, `EURJPY`, `GBPJPY` (Forex pairs)
+
+### 3. How It Works
+
+1. **Front‑end** (GitHub Pages) calls your **Vercel function** at `/api/market-data`
+2. **Vercel function** uses your Alpha Vantage key to fetch live prices
+3. **Data flows:** Alpha Vantage → Vercel → GitHub Pages → User's browser
+4. **Security:** Your API key stays on Vercel, never exposed to client
+
+### 4. Error Handling
+
+The system includes:
+- **Loading states** with spinner icons
+- **Fallback data** if backend is unavailable
+- **Toast notifications** for success/warnings
+- **Source badges** showing "Alpha Vantage" or "fallback"
+- **Auto‑retry** every 60 seconds (respects API limits)
+
+### 5. Next: Real Alerts & Grok/xAI
+
+To add real alert logic and Grok integration:
+
+1. **Extend the backend** to:
+   - Store historical prices
+   - Calculate technical indicators (RSI, volume spikes, breakouts)
+   - Call xAI/Grok API for market analysis
+   - Generate alert objects
+
+2. **Add a database** (Supabase, Firebase) for:
+   - User preferences
+   - Alert history
+   - Signal cooldowns
+
+3. **Replace mock alerts** in `app.js` with backend‑generated alerts.
+
+### 6. Monitoring
+
+Check your Alpha Vantage usage at:  
+[https://www.alphavantage.co/premium/](https://www.alphavantage.co/premium/)
+
+If you exceed free limits, consider:
+- Upgrading Alpha Vantage plan
+- Adding request caching
+- Reducing refresh frequency
+- Using multiple API keys

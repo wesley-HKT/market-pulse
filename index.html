@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Market Pulse - Personal Alerts</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="iphone-frame">
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="time">9:41</span>
+            </div>
+            <div class="status-right">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <!-- App header -->
+        <header class="app-header">
+            <h1>Market Pulse</h1>
+            <div class="header-actions">
+                <button class="icon-btn" id="refreshBtn" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="icon-btn" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="tab-btn" data-tab="markets">
+                <i class="fas fa-chart-line"></i>
+                <span>Markets</span>
+            </button>
+            <button class="tab-btn" data-tab="alerts">
+                <i class="fas fa-bell"></i>
+                <span>Alerts</span>
+                <span class="badge">3</span>
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <i class="fas fa-sliders-h"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- Tab content -->
+        <main class="tab-content">
+            <!-- Home tab -->
+            <section id="home-tab" class="tab-pane active">
+                <div class="welcome-card">
+                    <h2><i class="fas fa-wave-square"></i> Watchlist Snapshot</h2>
+                    <p class="subtitle">Latest signals for your selected instruments</p>
+                </div>
+
+                <div class="watchlist-container">
+                    <h3 class="section-title">Active Watchlist</h3>
+                    <div class="watchlist" id="watchlist">
+                        <!-- Watchlist items populated by JS -->
+                    </div>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-bullhorn"></i>
+                        <h4>Active Alerts</h4>
+                        <p class="stat-value">3</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <h4>Last Updated</h4>
+                        <p class="stat-value" id="lastUpdateTime">Just now</p>
+                    </div>
+                </div>
+
+                <div class="disclaimer">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Displayed prices and alerts are <strong>mock data</strong>. No real trading data or orders are being transmitted.</p>
+                </div>
+            </section>
+
+            <!-- Markets tab -->
+            <section id="markets-tab" class="tab-pane">
+                <div class="markets-header">
+                    <h2><i class="fas fa-chart-bar"></i> Market Watch</h2>
+                    <div class="market-filters">
+                        <button class="filter-btn active">All</button>
+                        <button class="filter-btn">Forex</button>
+                        <button class="filter-btn">Crypto</button>
+                        <button class="filter-btn">Metals</button>
+                    </div>
+                </div>
+                <div class="markets-list" id="marketsList">
+                    <!-- Market items populated by JS -->
+                </div>
+            </section>
+
+            <!-- Alerts tab -->
+            <section id="alerts-tab" class="tab-pane">
+                <div class="alerts-header">
+                    <h2><i class="fas fa-bell"></i> Alert History</h2>
+                    <div class="alert-filters">
+                        <button class="filter-btn active">All</button>
+                        <button class="filter-btn">Breakout</button>
+                        <button class="filter-btn">Volume</button>
+                        <button class="filter-btn">RSI</button>
+                    </div>
+                </div>
+                <div class="alerts-list" id="alertsList">
+                    <!-- Alert items populated by JS -->
+                </div>
+                <div class="no-alerts" id="noAlertsMessage" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <p>No alerts yet. Signals will appear here when triggered.</p>
+                </div>
+            </section>
+
+            <!-- Settings tab -->
+            <section id="settings-tab" class="tab-pane">
+                <h2><i class="fas fa-cog"></i> Preferences</h2>
+                
+                <div class="settings-section">
+                    <h3><i class="fas fa-sliders-h"></i> Alert Strategies</h3>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <div>
+                                <strong>Breakout detection</strong>
+                                <p>Price moves beyond recent range</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="breakoutToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-item">
+                            <div>
+                                <strong>Unusual volume</strong>
+                                <p>Volume spikes relative to average</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="volumeToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-item">
+                            <div>
+                                <strong>RSI extremes</strong>
+                                <p>Overbought/oversold conditions</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="rsiToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-eye"></i> Display</h3>
+                    <div class="toggle-item">
+                        <div>
+                            <strong>Dark mode</strong>
+                            <p>Use dark interface (always on)</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-shield-alt"></i> Data Source</h3>
+                    <div class="info-box">
+                        <i class="fas fa-database"></i>
+                        <div>
+                            <strong>Current source: Mock data</strong>
+                            <p>No market‑data provider or xAI/Grok integration is active. Credentials must remain server‑side.</p>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Security boundary</strong>
+                            <p>This page does not transmit trading orders or contain API keys.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-info-circle"></i> About</h3>
+                    <div class="about-info">
+                        <p><strong>Version:</strong> 0.1.0 (web prototype)</p>
+                        <p><strong>Instruments:</strong> XAU/USD, BTC/USD, JPY pairs</p>
+                        <p><strong>Purpose:</strong> Personal alert dashboard with mock data.</p>
+                        <p><strong>Next steps:</strong> Add market‑data provider and Grok/xAI backend.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast notification -->
+        <div class="toast" id="toast">
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage">Watchlist updated</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

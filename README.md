@@ -2,7 +2,7 @@
 
 iPhone‑style market‑alert dashboard for Gold (`XAU/USD`), Bitcoin (`BTC/USD`), and JPY FX pairs.
 
-**Live site:** [https://wesle.github.io/market‑pulse](https://wesle.github.io/market-pulse)
+**Live site:** [https://wesley-hkt.github.io/market-pulse](https://wesley-hkt.github.io/market-pulse)
 
 ## Features
 

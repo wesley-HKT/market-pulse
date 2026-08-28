@@ -1,5 +1,5 @@
 // Configuration
-const BACKEND_URL = 'https://market-pulse-umber.vercel.app/api/market-data-v2';
+const BACKEND_URL = 'https://market-pulse-umber.vercel.app/api/market-data';
 
 // Fallback mock data if backend is unavailable
 const fallbackMarkets = [

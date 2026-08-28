@@ -1,5 +1,5 @@
 // Configuration
-const BACKEND_URL = 'https://market-pulse-umber.vercel.app/api/market-data';
+const BACKEND_URL = 'https://market-pulse-umber.vercel.app/api/market-data-v2';
 
 // Fallback mock data if backend is unavailable
 const fallbackMarkets = [
@@ -65,36 +65,8 @@ const fallbackMarkets = [
     }
 ];
 
-// Mock alerts (these would also come from backend with real signals)
-const mockAlerts = [
-    {
-        id: 1,
-        symbol: 'XAU/USD',
-        title: 'Breakout Detected',
-        type: 'breakout',
-        message: 'Gold broke above resistance at 2330. Price currently 2345.67.',
-        time: '10 minutes ago',
-        severity: 'medium'
-    },
-    {
-        id: 2,
-        symbol: 'BTC/USD',
-        title: 'Unusual Volume Spike',
-        type: 'volume',
-        message: 'Bitcoin volume 2.3x 30‑day average. Current price 68542.19.',
-        time: '25 minutes ago',
-        severity: 'high'
-    },
-    {
-        id: 3,
-        symbol: 'USD/JPY',
-        title: 'RSI Oversold',
-        type: 'rsi',
-        message: 'RSI dropped below 30. Current price 148.92.',
-        time: '1 hour ago',
-        severity: 'low'
-    }
-];
+// Real alerts will come from backend
+let currentAlerts = [];
 
 // DOM Elements
 const tabButtons = document.querySelectorAll('.tab-btn');
